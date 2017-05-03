@@ -38,14 +38,16 @@ abstract class AbstractDataValue
             /** @var PropertyInterface $property */
             foreach ($fields as $property) {
 
-                $value = $fetchRow[$this->from_camel_case($property->getPropertyName())];
+                if (isset($fetchRow[$this->from_camel_case($property->getPropertyName())])) {
+                    $value = $fetchRow[$this->from_camel_case($property->getPropertyName())];
+                }
 
                 if (!is_null($value)) {
                     $_property = $property->setValue($value);
+                    $this->addProperty($property);
                 }
-                $this->addProperty($_property);
+
             }
-            exit;
         }
     }
 
@@ -188,17 +190,21 @@ abstract class AbstractDataValue
         return $return;
     }
 
-    public function to_camel_case($str, $capitalise_first_char = false) {
-        if($capitalise_first_char) {
+    public function to_camel_case($str, $capitalise_first_char = false)
+    {
+        if ($capitalise_first_char) {
             $str[0] = strtoupper($str[0]);
         }
         $func = create_function('$c', 'return strtoupper($c[1]);');
+
         return preg_replace_callback('/_([a-z])/', $func, $str);
     }
 
-    public function from_camel_case($str) {
+    public function from_camel_case($str)
+    {
         $str[0] = strtolower($str[0]);
-        $func = create_function('$c', 'return "_" . strtolower($c[1]);');
+        $func   = create_function('$c', 'return "_" . strtolower($c[1]);');
+
         return preg_replace_callback('/([A-Z])/', $func, $str);
     }
 }
