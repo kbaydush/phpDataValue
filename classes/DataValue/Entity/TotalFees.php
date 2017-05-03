@@ -1,5 +1,7 @@
 <?php
 
+namespace kbaydush\DataValue\Entity;
+
 class TotalFees {
     /** @var floatValue The Float value being stored */
     public $floatValue = 0;

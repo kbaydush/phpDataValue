@@ -6,11 +6,11 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Example;
+namespace kbaydush\DataValue\Example;
 
-use wert2all\DataValue\AbstractDataValue;
-use wert2all\DataValue\Property;
-use wert2all\DataValue\Property\PropertyInterface;
+use kbaydush\DataValue\AbstractDataValue;
+use kbaydush\DataValue\Property;
+use kbaydush\DataValue\Property\PropertyInterface;
 
 /**
  * @method Engine setPower(mixed $value)

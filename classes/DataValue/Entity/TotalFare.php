@@ -1,5 +1,7 @@
 <?php
 
+namespace kbaydush\DataValue\Entity;
+
 class TotalFare
 {
     /** @var floatValue The Float value being stored */

@@ -6,7 +6,7 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Exception\Property;
+namespace kbaydush\DataValue\Exception\Property;
 
 class ReadOnly extends \Exception
 {

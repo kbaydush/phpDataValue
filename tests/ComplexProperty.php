@@ -6,10 +6,10 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Tests\DataValue;
+namespace kbaydush\DataValue\Tests\DataValue;
 
-use wert2all\DataValue\Example\Car;
-use wert2all\DataValue\Example\Engine;
+use kbaydush\DataValue\Example\Car;
+use kbaydush\DataValue\Example\Engine;
 
 class ComplexProperty extends \PHPUnit_Framework_TestCase
 {

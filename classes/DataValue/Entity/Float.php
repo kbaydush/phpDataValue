@@ -1,4 +1,6 @@
 <?php
+
+namespace kbaydush\DataValue\Entity;
 /**
  * Float Class
  *

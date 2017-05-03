@@ -7,49 +7,49 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Tests\DataValue;
+namespace kbaydush\DataValue\Tests\DataValue;
 
-use wert2all\DataValue\AbstractDataValue;
-use wert2all\DataValue\Example\Car;
-use wert2all\DataValue\Example\Engine;
-use wert2all\DataValue\Property;
+use kbaydush\DataValue\AbstractDataValue;
+use kbaydush\DataValue\Example\Car;
+use kbaydush\DataValue\Example\Engine;
+use kbaydush\DataValue\Property;
 
 class AbstractTest extends \PHPUnit_Framework_TestCase
 {
     /** @var  AbstractDataValue */
     protected $param;
 
-    /** @expectedException wert2all\DataValue\Exception\NotSetterNotGetter */
+    /** @expectedException kbaydush\DataValue\Exception\NotSetterNotGetter */
     public function testBadMethod()
     {
         $this->param->tesEngine();
     }
 
-    /** @expectedException  wert2all\DataValue\Exception\SetterOneArgument */
+    /** @expectedException  kbaydush\DataValue\Exception\SetterOneArgument */
     public function testSetterNullArgumentsException()
     {
         $this->param->setEngine();
     }
 
-    /** @expectedException  wert2all\DataValue\Exception\SetterOneArgument */
+    /** @expectedException  kbaydush\DataValue\Exception\SetterOneArgument */
     public function testSetterMoreOneArgumentsException()
     {
         $this->param->setEngine("1", "2");
     }
 
-    /** @expectedException  wert2all\DataValue\Exception\GetterWithoutArguments */
+    /** @expectedException  kbaydush\DataValue\Exception\GetterWithoutArguments */
     public function testGetterNotNUllArgumentsException()
     {
         $this->param->getEngine("1");
     }
 
-    /** @expectedException  wert2all\DataValue\Exception\Property\Bad */
+    /** @expectedException  kbaydush\DataValue\Exception\Property\Bad */
     public function testBadGetterException()
     {
         $this->param->getException();
     }
 
-    /** @expectedException  wert2all\DataValue\Exception\Property\Bad */
+    /** @expectedException  kbaydush\DataValue\Exception\Property\Bad */
     public function testBadSetterException()
     {
         $this->param->setException("S");
@@ -84,7 +84,7 @@ class AbstractTest extends \PHPUnit_Framework_TestCase
     public function testSetterReturn()
     {
         $this->assertInstanceOf(
-            'wert2all\DataValue\AbstractDataValue',
+            'kbaydush\DataValue\AbstractDataValue',
             $this->param->setEngine(new Engine())
         );
     }
@@ -105,7 +105,7 @@ class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->param->setColor("red");
 
         $this->assertEquals(
-            'wert2all\DataValue\Example\Car values:' . "\n\tengine: ,\n\tcolor: red,\n",
+            'kbaydush\DataValue\Example\Car values:' . "\n\tengine: ,\n\tcolor: red,\n",
             $this->param->toString()
         );
     }
@@ -123,7 +123,7 @@ class AbstractTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /** @expectedException wert2all\DataValue\Exception\Property\BadValueType */
+    /** @expectedException kbaydush\DataValue\Exception\Property\BadValueType */
     public function testBadTypeOfSetter()
     {
         $this->param->setEngine("bad");

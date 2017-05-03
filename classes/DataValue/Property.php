@@ -7,12 +7,12 @@
  */
 
 
-namespace wert2all\DataValue;
+namespace kbaydush\DataValue;
 
-use wert2all\DataValue\Exception\Property\BadValueType;
-use wert2all\DataValue\Exception\Property\ReadOnly;
-use wert2all\DataValue\Exception\Property\Required;
-use wert2all\DataValue\Property\PropertyInterface;
+use kbaydush\DataValue\Exception\Property\BadValueType;
+use kbaydush\DataValue\Exception\Property\ReadOnly;
+use kbaydush\DataValue\Exception\Property\Required;
+use kbaydush\DataValue\Property\PropertyInterface;
 
 final class Property implements PropertyInterface
 {

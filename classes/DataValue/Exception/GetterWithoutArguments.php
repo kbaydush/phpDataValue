@@ -6,7 +6,7 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Exception;
+namespace kbaydush\DataValue\Exception;
 
 class GetterWithoutArguments extends \Exception
 {

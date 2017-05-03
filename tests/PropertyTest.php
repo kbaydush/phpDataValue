@@ -6,12 +6,12 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Tests\DataValue;
+namespace kbaydush\DataValue\Tests\DataValue;
 
-use wert2all\DataValue\Example\Car;
-use wert2all\DataValue\Example\Engine;
-use wert2all\DataValue\Property;
-use wert2all\DataValue\Property\PropertyInterface;
+use kbaydush\DataValue\Example\Car;
+use kbaydush\DataValue\Example\Engine;
+use kbaydush\DataValue\Property;
+use kbaydush\DataValue\Property\PropertyInterface;
 
 class PropertyTest extends \PHPUnit_Framework_TestCase
 {
@@ -27,17 +27,17 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
 
     public function testSetterReturnValue()
     {
-        $this->assertInstanceOf('wert2all\DataValue\Property\PropertyInterface', $this->property->setValue("1"));
+        $this->assertInstanceOf('kbaydush\DataValue\Property\PropertyInterface', $this->property->setValue("1"));
     }
 
     public function testReadOnlyReturnValue()
     {
-        $this->assertInstanceOf('wert2all\DataValue\Property\PropertyInterface', $this->property->setReadOnly());
+        $this->assertInstanceOf('kbaydush\DataValue\Property\PropertyInterface', $this->property->setReadOnly());
     }
 
     public function testRequiredReturnValue()
     {
-        $this->assertInstanceOf('wert2all\DataValue\Property\PropertyInterface', $this->property->setRequired());
+        $this->assertInstanceOf('kbaydush\DataValue\Property\PropertyInterface', $this->property->setRequired());
     }
 
     public function testSetterReadOnly()
@@ -49,7 +49,7 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->property->isValueSet());
     }
 
-    /** @expectedException wert2all\DataValue\Exception\Property\ReadOnly */
+    /** @expectedException kbaydush\DataValue\Exception\Property\ReadOnly */
     public function testFailOnSettingReadOnly()
     {
         $this->property->setReadOnly();
@@ -80,7 +80,7 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("1", $this->property->getValue());
     }
 
-    /** @expectedException wert2all\DataValue\Exception\Property\Required */
+    /** @expectedException kbaydush\DataValue\Exception\Property\Required */
     public function testRequiredFail()
     {
         $this->property->setRequired();
@@ -233,7 +233,7 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
             ->setValue(new Car());
     }
 
-    /** @expectedException wert2all\DataValue\Exception\Property\BadValueType */
+    /** @expectedException kbaydush\DataValue\Exception\Property\BadValueType */
     public function testBadValueType()
     {
         $this->property->setValueType(Engine::class)

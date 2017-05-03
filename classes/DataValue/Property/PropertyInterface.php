@@ -6,7 +6,7 @@
  * @license     {license_link}
  */
 
-namespace wert2all\DataValue\Property;
+namespace kbaydush\DataValue\Property;
 
 interface PropertyInterface
 {
