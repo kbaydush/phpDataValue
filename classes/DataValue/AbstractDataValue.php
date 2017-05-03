@@ -29,9 +29,8 @@ abstract class AbstractDataValue
      */
     protected $properties = array();
 
-    final public function __construct(array $fetchRow = null)
+    final public function __construct(array $fetchRow)
     {
-
         $fields = $this->getInitPropertyList();
 
         if (is_array($fetchRow)) {
@@ -44,7 +43,7 @@ abstract class AbstractDataValue
 
                 if (!is_null($value)) {
                     $_property = $property->setValue($value);
-                    $this->addProperty($property);
+                    $this->addProperty($_property);
                 }
 
             }
