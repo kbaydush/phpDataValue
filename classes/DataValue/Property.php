@@ -81,7 +81,7 @@ final class Property implements PropertyInterface
     public function getValue()
     {
         if ($this->isRequired === true and $this->isValueSet() !== true) {
-            throw  new Required();
+            throw  new Required($this->getPropertyName());
         }
         return $this->value;
     }
