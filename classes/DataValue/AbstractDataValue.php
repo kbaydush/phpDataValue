@@ -42,10 +42,10 @@ abstract class AbstractDataValue
                 }
 
                 if (!is_null($value)) {
-                    $_property = $property->setValue($value);
-                    $this->addProperty($_property);
+                    $property = $property->setValue($value);
                 }
 
+                $this->addProperty($property);
             }
         }
     }
