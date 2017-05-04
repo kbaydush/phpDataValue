@@ -1,11 +1,10 @@
 <?php
 /**
- * {license_notice}
+ * author: k.baidush
  *
- * @copyright   {copyright}
- * @license     {license_link}
+ * @copyright   Gett
+ * @license     Gett
  */
-
 
 namespace kbaydush\DataValue;
 
@@ -13,6 +12,10 @@ use kbaydush\DataValue\Exception\Property\BadValueType;
 use kbaydush\DataValue\Exception\Property\ReadOnly;
 use kbaydush\DataValue\Exception\Property\Required;
 use kbaydush\DataValue\Property\PropertyInterface;
+use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Boolean;
+use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Double;
+use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Float;
+use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Integer;
 
 final class Property implements PropertyInterface
 {
@@ -30,13 +33,19 @@ final class Property implements PropertyInterface
     protected $valueType = null;
 
     /**
+     * @var array
+     */
+    protected $mathArguments = null;
+
+    /**
      * PropertyAbstract constructor.
-     * @param string $name
+     *
+     * @param string       $name
      * @param mixed | null $value
      */
     final public function __construct($name, $value = null)
     {
-        $this->name = $name;
+        $this->name  = $name;
         $this->value = $value;
         if (!is_null($value)) {
             $this->isValueSet = true;
@@ -45,16 +54,19 @@ final class Property implements PropertyInterface
 
     /**
      * @param bool $isRequired
+     *
      * @return PropertyInterface
      */
     public function setRequired($isRequired = true)
     {
         $this->isRequired = $isRequired;
+
         return $this;
     }
 
     /**
      * @param PropertyInterface $property
+     *
      * @return boolean
      */
     public function equal(PropertyInterface $property)
@@ -65,6 +77,15 @@ final class Property implements PropertyInterface
             and ($this->isReadOnly() === $property->isReadOnly())
             and ($this->isRequired() === $property->isRequired());
     }
+
+    /**
+     * @return array
+     */
+    public function amount()
+    {
+        return $this->complexType;
+    }
+
 
     /**
      * @return mixed
@@ -81,14 +102,16 @@ final class Property implements PropertyInterface
     public function getValue()
     {
         if ($this->isRequired === true and $this->isValueSet() !== true) {
-            echo "Required ". $this->getPropertyName();
+            echo "Required " . $this->getPropertyName();
             throw  new Required($this->getPropertyName());
         }
+
         return $this->value;
     }
 
     /**
      * @param mixed $value
+     *
      * @return PropertyInterface
      * @throws BadValueType
      * @throws ReadOnly
@@ -101,16 +124,29 @@ final class Property implements PropertyInterface
         }
 
         if (!is_null($this->valueType)) {
+//
+            if ($this->valueType == Integer::class) {
+                $value = new Integer($value);
+            } elseif ($this->valueType == Float::class) {
+                $value = new Float($value);
+            } elseif ($this->valueType == Float::class) {
+                $value = new Double($value);
+            } elseif ($this->valueType == Boolean::class) {
+                $value = new Boolean($value);
+            }
+
             if (!is_object($value) or get_class($value) !== $this->valueType) {
-                echo "Bad Type ". $this->valueType;
+                echo "Bad Type " . $this->valueType;
                 throw new BadValueType();
             }
         }
         $return = new Property($this->getPropertyName(), $value);
         $return->setReadOnly($this->isReadOnly())
             ->setRequired($this->isRequired());
+
         return $return;
     }
+
 
     /** @return  boolean */
     public function isValueSet()
@@ -136,11 +172,13 @@ final class Property implements PropertyInterface
 
     /**
      * @param bool $isReadOnly
+     *
      * @return PropertyInterface
      */
     public function setReadOnly($isReadOnly = true)
     {
         $this->isReadOnly = $isReadOnly;
+
         return $this;
     }
 
@@ -162,11 +200,13 @@ final class Property implements PropertyInterface
 
     /**
      * @param string $className
+     *
      * @return $this
      */
     public function setValueType($className)
     {
         $this->valueType = $className;
+
         return $this;
     }
 }
