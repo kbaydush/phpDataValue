@@ -81,6 +81,7 @@ final class Property implements PropertyInterface
     public function getValue()
     {
         if ($this->isRequired === true and $this->isValueSet() !== true) {
+            echo "Required ". $this->getPropertyName();
             throw  new Required($this->getPropertyName());
         }
         return $this->value;
@@ -95,11 +96,13 @@ final class Property implements PropertyInterface
     public function setValue($value)
     {
         if ($this->isReadOnly === true and $this->isValueSet() === true) {
+            echo "Read Only - " . $this->getPropertyName();
             throw new ReadOnly();
         }
 
         if (!is_null($this->valueType)) {
             if (!is_object($value) or get_class($value) !== $this->valueType) {
+                echo "Bad Type ". $this->valueType;
                 throw new BadValueType();
             }
         }
