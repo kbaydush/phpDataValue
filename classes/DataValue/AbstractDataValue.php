@@ -29,7 +29,7 @@ abstract class AbstractDataValue
      */
     protected $properties = array();
 
-    final public function __construct(array $fetchRow)
+    final public function __construct(array $fetchRow = null)
     {
         $fields = $this->getInitPropertyList();
 
