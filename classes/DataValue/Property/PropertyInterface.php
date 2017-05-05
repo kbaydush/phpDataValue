@@ -64,4 +64,8 @@ interface PropertyInterface
      * @return $this
      */
     public function setValueType($className);
+
+    public function getDependencies();
+
+    public function setDependencies($array);
 }

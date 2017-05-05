@@ -1,194 +1,198 @@
 <?php
 /**
- * author: k.baidush
+ * {license_notice}
  *
- * @copyright   Gett
- * @license     Gett
+ * @copyright   {copyright}
+ * @license     {license_link}
  */
 
 namespace kbaydush\DataValue;
 
-use kbaydush\DataValue\Exception\Property\BadValueType;
-use kbaydush\DataValue\Exception\Property\ReadOnly;
-use kbaydush\DataValue\Exception\Property\Required;
+use Doctrine\Common\Collections\ArrayCollection;
+use Exception;
+use kbaydush\DataValue\Exception\GetterWithoutArguments;
+use kbaydush\DataValue\Exception\NotSetterNotGetter;
+use kbaydush\DataValue\Exception\Property\Bad;
+use kbaydush\DataValue\Exception\SetterOneArgument;
 use kbaydush\DataValue\Property\PropertyInterface;
-use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Boolean;
-use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Double;
-use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Float;
-use TreasureForge\InvoiceBundle\Model\DataValue\dataTypes\Integer;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
+use TreasureForge\InvoiceBundle\Model\DataValue\GtforgeOrder;
 
-final class Property implements PropertyInterface
+/**
+ * {license_notice}
+ *
+ * @copyright   {copyright}
+ * @license     {license_link}
+ */
+abstract class AbstractDataValue
 {
-    /** @var  mixed */
-    protected $value;
-    /** @var  string */
-    protected $name;
-    /** @var boolean */
-    protected $isValueSet = false;
-    /** @var  boolean */
-    protected $isReadOnly = false;
-    /** @var  boolean */
-    protected $isRequired = false;
-    /** @var  string */
-    protected $valueType = null;
-
     /**
-     * @var array
+     * @var PropertyInterface[]
      */
-    protected $sumArray = null;
+    protected $properties = array();
 
-    /**
-     * @return array
-     */
-    public function getSum()
+    protected $ids = array();
+
+    final public function __construct(array $fetchRow = null)
     {
-        return $this->sumArray;
+        $fields = $this->getInitPropertyList();
+
+        if (is_array($fetchRow)) {
+            /** @var PropertyInterface $property */
+            foreach ($fields as $property) {
+
+                $arrKey = $this->from_camel_case($property->getPropertyName());
+
+                $value = isset($fetchRow[$arrKey]) ? $fetchRow[$arrKey] : null;
+
+                if (!is_null($value)) {
+                    $property = $property->setValue($value);
+                }
+
+                $this->addProperty($property);
+            }
+        }
+    }
+
+    public function handleIds()
+    {
+        return new ArrayCollection($this->ids);
+    }
+
+    public function handleAll($fetchResult, $key = 'order_id')
+    {
+        $result = new ArrayCollection();
+        foreach ($fetchResult as $singleRaw) {
+
+            $newProperty = new GtforgeOrder($singleRaw);
+            $result->set($singleRaw[$key], $newProperty);
+            $this->orderIds[$singleRaw[$key]] = $singleRaw[$key];
+        }
+
+        return $result;
     }
 
     /**
-     * @param array $array
+     * @return PropertyInterface[]
      */
-    public function setSum($array)
+    abstract protected function getInitPropertyList();
+
+    /**
+     * @param PropertyInterface $value
+     *
+     * @return AbstractDataValue
+     */
+    final protected function addProperty(PropertyInterface $value)
     {
-        $this->sumArray = $array;
+        $this->properties[mb_strtolower($value->getPropertyName())] = $value;
 
         return $this;
     }
 
-    /**
-     * PropertyAbstract constructor.
-     *
-     * @param string       $name
-     * @param mixed | null $value
-     */
-    final public function __construct($name, $value = null)
+    final public function __call($name, array $arguments)
     {
-        $this->name  = $name;
-        $this->value = $value;
-        if (!is_null($value)) {
-            $this->isValueSet = true;
+        $name     = mb_strtolower($name);
+        $prefix   = mb_substr($name, 0, 3);
+        $dataName = mb_substr($name, 3);
+
+        if (!$this->isPropertyExist($dataName)) {
+            throw new Bad($dataName);
+        }
+
+        switch ($prefix) {
+            case "set":
+                return $this->setter($dataName, $arguments);
+                break;
+            case "get":
+                return $this->getter($dataName, $arguments);
+                break;
+            default:
+                throw new NotSetterNotGetter();
         }
     }
 
     /**
-     * @param bool $isRequired
+     * @param string $dataName
      *
-     * @return PropertyInterface
+     * @return bool
      */
-    public function setRequired($isRequired = true)
+    protected function isPropertyExist($dataName)
     {
-        $this->isRequired = $isRequired;
-
-        return $this;
+        return isset($this->properties[$dataName]);
     }
 
     /**
-     * @param PropertyInterface $property
+     * @param string $name
+     * @param array  $arguments
      *
-     * @return boolean
+     * @return $this
+     * @throws SetterOneArgument
      */
-    public function equal(PropertyInterface $property)
+    protected function setter($name, array $arguments)
     {
         return
-            ($this->getPropertyName() === $property->getPropertyName())
-            and ($this->getValue() === $property->getValue())
-            and ($this->isReadOnly() === $property->isReadOnly())
-            and ($this->isRequired() === $property->isRequired());
+            $this->testArguments($arguments, 1, new SetterOneArgument())
+                ->addProperty(
+                    $this->getProperty($name)
+                        ->setValue(current($arguments))
+                );
     }
 
     /**
-     * @return mixed
-     */
-    public function getPropertyName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return mixed
-     * @throws Required
-     */
-    public function getValue()
-    {
-        if ($this->isRequired === true and $this->isValueSet() !== true) {
-            echo "Required " . $this->getPropertyName();
-            throw  new Required($this->getPropertyName());
-        }
-
-        return $this->value;
-    }
-
-    /**
-     * @param mixed $value
+     * @param array     $arguments
+     * @param int       $countArguments
+     * @param Exception $errorObject
      *
-     * @return PropertyInterface
-     * @throws BadValueType
-     * @throws ReadOnly
+     * @return $this
+     * @throws Exception
      */
-    public function setValue($value)
+    protected function testArguments(array $arguments, $countArguments, Exception $errorObject)
     {
-        if ($this->isReadOnly === true and $this->isValueSet() === true) {
-            echo "Read Only - " . $this->getPropertyName();
-            throw new ReadOnly();
+        if (!$this->isArgumentsCount($arguments, $countArguments)) {
+            throw $errorObject;
         }
-
-        if (!is_null($this->valueType)) {
-//
-            if ($this->valueType == Integer::class) {
-                $value = new Integer($value);
-            } elseif ($this->valueType == Float::class) {
-                $value = new Float($value);
-            } elseif ($this->valueType == Float::class) {
-                $value = new Double($value);
-            } elseif ($this->valueType == Boolean::class) {
-                $value = new Boolean($value);
-            }
-
-            if (!is_object($value) or get_class($value) !== $this->valueType) {
-                echo "Bad Type " . $this->valueType;
-                throw new BadValueType();
-            }
-        }
-        $return = new Property($this->getPropertyName(), $value);
-        $return->setReadOnly($this->isReadOnly())
-            ->setRequired($this->isRequired());
-
-        return $return;
-    }
-
-
-    /** @return  boolean */
-    public function isValueSet()
-    {
-        return ($this->isValueSet);
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isReadOnly()
-    {
-        return $this->isReadOnly;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isRequired()
-    {
-        return $this->isRequired;
-    }
-
-    /**
-     * @param bool $isReadOnly
-     *
-     * @return PropertyInterface
-     */
-    public function setReadOnly($isReadOnly = true)
-    {
-        $this->isReadOnly = $isReadOnly;
 
         return $this;
+    }
+
+    /**
+     * @param array   $arguments
+     * @param integer $count
+     *
+     * @return bool
+     */
+    protected function isArgumentsCount(array $arguments, $count)
+    {
+        return count($arguments) === $count;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return PropertyInterface
+     */
+    protected function getProperty($name)
+    {
+        if(isset($this->properties[mb_strtolower($name)])) {
+            return $this->properties[mb_strtolower($name)];
+        } else {
+            echo "Property is not exist" . mb_strtolower($name);
+            throw new Bad("Property is not exist");
+            return null;
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param array  $arguments
+     *
+     * @return mixed
+     * @throws GetterWithoutArguments
+     */
+    protected function getter($name, array $arguments)
+    {
+        return $this->testArguments($arguments, 0, new GetterWithoutArguments())
+            ->getProperty($name)->getValue();
     }
 
     /**
@@ -200,22 +204,61 @@ final class Property implements PropertyInterface
     }
 
     /**
-     * @return  string
+     * @return string
      */
     public function toString()
     {
-        return $this->getPropertyName() . ": " . $this->getValue();
+        $return = get_class($this) . " values:\n";
+        /** @var PropertyInterface $property */
+        foreach ($this->properties as $property) {
+            $return .= "\t" . $property->toString() . ",\n";
+        }
+
+        return $return;
     }
 
-    /**
-     * @param string $className
-     *
-     * @return $this
-     */
-    public function setValueType($className)
+    public function to_camel_case($str, $capitalise_first_char = false)
     {
-        $this->valueType = $className;
+        if ($capitalise_first_char) {
+            $str[0] = strtoupper($str[0]);
+        }
+        $func = create_function('$c', 'return strtoupper($c[1]);');
 
+        return preg_replace_callback('/_([a-z])/', $func, $str);
+    }
+
+    public function from_camel_case($str)
+    {
+        $str[0] = strtolower($str[0]);
+        $func   = create_function('$c', 'return "_" . strtolower($c[1]);');
+
+        return preg_replace_callback('/([A-Z])/', $func, $str);
+    }
+
+    public function calcDependencies() {
+
+        $fields = $this->getInitPropertyList();
+
+        foreach ($fields as $property) {
+
+            $arr = $property->getDependencies();
+            if (is_array($arr) && count($arr) > 0) {
+
+                $sumVal = 0;
+                foreach ($arr as $key => $name) {
+
+                    $pr = $this->getProperty($name);
+
+                    if ($pr !== null) {
+                        $sumVal += $pr->getValue();
+                    }
+                }
+
+                $property->setValue($sumVal);
+            }
+
+            $this->addProperty($property);
+        }
         return $this;
     }
 }

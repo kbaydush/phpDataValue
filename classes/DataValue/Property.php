@@ -35,7 +35,25 @@ final class Property implements PropertyInterface
     /**
      * @var array
      */
-    protected $mathArguments = null;
+    protected $depArray = null;
+
+    /**
+     * @return array
+     */
+    public function getDependencies()
+    {
+        return $this->depArray;
+    }
+
+    /**
+     * @param array $array
+     */
+    public function setDependencies($array)
+    {
+        $this->depArray = $array;
+
+        return $this;
+    }
 
     /**
      * PropertyAbstract constructor.
@@ -79,15 +97,6 @@ final class Property implements PropertyInterface
     }
 
     /**
-     * @return array
-     */
-    public function amount()
-    {
-        return $this->complexType;
-    }
-
-
-    /**
      * @return mixed
      */
     public function getPropertyName()
@@ -124,12 +133,12 @@ final class Property implements PropertyInterface
         }
 
         if (!is_null($this->valueType)) {
-//
+
             if ($this->valueType == Integer::class) {
                 $value = new Integer($value);
             } elseif ($this->valueType == Float::class) {
                 $value = new Float($value);
-            } elseif ($this->valueType == Float::class) {
+            } elseif ($this->valueType == Double::class) {
                 $value = new Double($value);
             } elseif ($this->valueType == Boolean::class) {
                 $value = new Boolean($value);
